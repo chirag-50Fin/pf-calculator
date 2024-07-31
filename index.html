@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Processing Fee Calculator</title>
+
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      .container {
+        margin-top: 50px;
+      }
+
+      .result-table {
+        margin-top: 50px;
+      }
+
+      th,
+      td {
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Processing Fee Calculator</h2>
+      <form id="loanForm">
+        <div class="form-group">
+          <label for="loanAmount">Loan Amount:</label>
+          <input type="number" class="form-control" id="loanAmount" required />
+        </div>
+        <div class="form-group">
+          <label for="partnerSelection">Select Partner:</label>
+          <select class="form-control" id="partnerSelection" required>
+            <option value="">Select a partner</option>
+            <option value="mymoneymantra">MyMoneyMantra</option>
+            <option value="bajajcapital">BajajCapital</option>
+            <option value="motilaloswal">MotilalOswal</option>
+            <option value="others">Others</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Calculate</button>
+      </form>
+      <div id="result" class="mt-4"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+      const CONSTANTS = {
+        THIRD_PARTY_INITIALS: "",
+      };
+
+      document
+        .getElementById("loanForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          calculateFees();
+        });
+
+      function calculateProcessingFees(loanAmount) {
+        if (CONSTANTS.THIRD_PARTY_INITIALS === "mymoneymantra") {
+          return calculateMyMoneyMantraPf(loanAmount);
+        }
+        if (CONSTANTS.THIRD_PARTY_INITIALS === "bajajcapital") {
+          return calculateBajajCapitalPf(loanAmount);
+        }
+        if (
+          CONSTANTS.THIRD_PARTY_INITIALS === "mo" ||
+          CONSTANTS.THIRD_PARTY_INITIALS === "motilaloswal" ||
+          CONSTANTS.THIRD_PARTY_INITIALS === "motilal"
+        ) {
+          return calculateMotilalOswalPf(loanAmount);
+        }
+
+        let processingFee = 999;
+        let basePf = 0;
+        let interestNim = 0;
+        let totalNim = 0;
+
+        if (loanAmount > 50000) {
+          interestNim = ((10.5 - 9.75) * 0.6) / 100;
+          basePf = 999;
+          totalNim = 0.0085;
+
+          const processingFeeNim = totalNim - interestNim;
+          const processingFeeShare = processingFeeNim * loanAmount;
+          const processingFeeWithoutBase = processingFeeShare / 0.75;
+
+          if (loanAmount <= 100000) {
+            processingFee = 1399;
+          } else {
+            processingFee = Math.ceil(basePf + processingFeeWithoutBase);
+          }
+        }
+
+        return processingFee;
+      }
+
+      function calculateMyMoneyMantraPf(loanAmount) {
+        let baseFee = 999;
+        const pf = Math.ceil(loanAmount * 0.02);
+        return Math.max(pf, baseFee);
+      }
+
+      function calculateMotilalOswalPf(loanAmount) {
+        let baseFee = 999;
+        const pf = Math.ceil(loanAmount * 0.01);
+        return Math.max(pf, baseFee);
+      }
+
+      function calculateBajajCapitalPf(loanAmount) {
+        let baseFee = 999;
+        const pf = Math.ceil(loanAmount * 0.02);
+        return Math.max(pf, baseFee);
+      }
+
+      function calculateFees() {
+        const loanAmount = parseFloat(
+          document.getElementById("loanAmount").value
+        );
+        const partner = document.getElementById("partnerSelection").value;
+
+        CONSTANTS.THIRD_PARTY_INITIALS = partner;
+
+        if (isNaN(loanAmount) || loanAmount <= 0) {
+          document.getElementById("result").textContent =
+            "Please enter a valid loan amount.";
+          return;
+        }
+
+        const processingFee = calculateProcessingFees(loanAmount);
+        document.getElementById(
+          "result"
+        ).textContent = `The processing fee is: ₹${processingFee.toLocaleString(
+          "en-IN"
+        )}`;
+      }
+    </script>
+  </body>
+</html>
